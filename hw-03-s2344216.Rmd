@@ -79,7 +79,7 @@ gss16_advfront <- gss16_advfront %>%
 
 Please see [chapter 14 of R for Data Science](https://r4ds.had.co.nz/strings.html) for more on string processing commands.
 
-You now have the cleaned and pre-processe data to use for modelling, you can continue with the `gss16_advfront` for the following questions. 
+You now have the cleaned and pre-processed data to use for modelling, you can continue with the `gss16_advfront` for the following questions. 
 
 ## Exercise 1: Create a linear regression model
 
@@ -91,7 +91,35 @@ b) Comment on the overall performance of the linear regression model. Support yo
 
 ```{r}
 
+linear_reg() %>%
+  set_engine("lm") %>%
+  fit(emailhr ~ educ, data = gss16_advfront) %>%
+  tidy()
+
+cat("The formula for the line of best fit if y = emailhr and x = educ is given by: y = 0.69x - 2.76", "\n")
+
+gss16_advfront %>%
+  ggplot(mapping = aes(x = educ, y = emailhr)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = F, color = "orange") +
+  labs(
+    title = "Linear Regression model",
+    subtitle = "Number of years in education vs. Number of hours spent on email per week",
+    x = "Number of years in education",
+    y = "Number of hours spent on email per week"
+    )+
+  theme_minimal()
+
+use glance
+
 ```
+
+*Exercise 1:*
+
+a) The y-intercept of the line of best fit implies that if the individual has no education then they spend -2.76 hours checking their email on a weekly basis. This does not make sense as it is not possible to spend 'negative' hours checking your email, the lowest value should be 0. This implies that a linear fit may not be the best model for this set of data. Moreover, the slope implies that on average, for each additional year spent in education, the amount of time people spend checking their email each week is expected to be higher, on average, by 0.69 hours.  
+
+b) Overall, the model does not seem to be an ideal fit because the y-intercept is negative which does not make physical sense. Moreover, looking at the scatter plot with a linear model on it the data does not appear to have a linear relationship at all as the same number of years in education have a range of unique values for the number of hours being spent on their email, suggesting there is not really any relationship between these two variables. This is further supported by the statistics...
+
 
 ## Exercise 2: Create a workflow to fit a model
 
@@ -120,9 +148,33 @@ The recipe (named `gss16_rec_1`) should contain the following steps for predicti
 
 ```{r}
 
+set.seed(1234)
+
+gss16_rec_1 <- recipe(
+  advfront ~ educ, 
+  data = gss16_train
+  ) %>%
+  step_dummy(all_nominal(), -all_outcomes())
+
+# Defining the model
+gss16_mod_1 <- logistic_reg() %>%
+  set_engine("glm")
+
+# Building the workflow
+gss16_wflow_1 <- workflow() %>%
+  add_recipe(gss16_rec_1) %>%
+  add_model(gss16_mod_1)
+
+# Train the model using the training data
+gss16_wflow_1 %>%
+  fit(data = gss16_train) %>%
+  tidy()
+
 ```
 
 b) Explain why you have chosen the model that you have selected.
+
+I chose a logistic regression because we were looking at a binary outcome model/prediction where they either agree or disagree with the statement given, hence the data wrangling we did earlier on in the code.
 
 ## Exercise 3: Logistic regression with single predictor
 
