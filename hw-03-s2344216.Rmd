@@ -291,9 +291,4 @@ b) Comment on which model performs better
   
 Explain your reasoning.
 
-```{r}
-
-```
-
-
-
+Evaluating soley using the AUC value we can see that the second model is a better fit since we have a higher value. However, the difference is minimal and both models do not seem be great fits since the value is not even close to the accepted value of 0.8. Furthermore, the ROC curve for the second model also seems to support it as the better model since it is closer to the upper left hand corner of the plot.
